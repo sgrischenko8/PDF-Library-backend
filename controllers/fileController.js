@@ -21,16 +21,21 @@ exports.uploadFile = async (req, res, next) => {
     const file = await File.create(fileData);
     res.status(201).send(file);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
 
 exports.removeFile = async (req, res, next) => {
-  const { id } = req.params;
   try {
-    await File.deleteOne({ _id: id });
+    if (req.file.uploadedBy.toString() !== req.session.userId) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    await File.deleteOne({ _id: req.params.id });
     res.status(200).json({ message: "file deleted" });
   } catch (error) {
+    console.log(error);
     res.status(404).json({ message: "Not found" });
     next(error);
   }
@@ -42,6 +47,7 @@ exports.getFile = async (req, res, next) => {
     const user = await User.findById(file.uploadedBy._id);
     res.status(200).json({ file, user });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -50,6 +56,7 @@ exports.getFiles = async (req, res, next) => {
     const files = await File.find({ visibility: true });
     res.status(200).json(files);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -60,8 +67,9 @@ exports.updateFile = async (req, res, next) => {
     const currentFile = await File.findByIdAndUpdate({ _id: id }, req.body);
     const updatedFile = Object.assign(currentFile, req.body);
 
-    res.status(201).json(updatedFile);
+    res.status(201).send(updatedFile);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };

@@ -10,9 +10,6 @@ exports.checkFileId = async (req, res, next) => {
     req.file = file;
     next();
   } catch (error) {
-    if (error.reason) {
-      return res.status(404).json({ message: "Not found" });
-    }
     console.log(error);
     res.sendStatus(500);
   }
@@ -25,10 +22,19 @@ exports.checkFile = async (req, res, next) => {
     });
   }
 
-  try {
+  next();
+};
+
+exports.checkBody = async (req, res, next) => {
+  if (
+    typeof req.body?.visibility === "boolean" &&
+    Object.values(req.body).length === 1
+  ) {
     next();
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    res.status(500).send(error.message);
+  } else {
+    return res.status(400).send({
+      message:
+        "Only the 'visibility' key is allowed to be changed, and it must be a boolean",
+    });
   }
 };

@@ -105,6 +105,7 @@ exports.checkCookie = async (req, res, next) => {
     });
 
     if (!sessionExists) {
+      console.log("session not exist");
       res.clearCookie("connect.sid");
       return res.status(404).json("User not found");
     }
@@ -130,30 +131,21 @@ exports.checkUserId = async (req, res, next) => {
 
     next();
   } catch (error) {
-    if (error.reason) {
-      return res.status(404).json({ message: "Not found" });
-    }
     console.log(error);
     res.sendStatus(500);
   }
 };
 
 exports.checkAbsenceBodyInPatch = async (req, res, next) => {
-  try {
-    if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: "missing fields" });
-    }
-
-    next();
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({ message: "missing fields" });
   }
+
+  next();
 };
 
 exports.checkFile = (req, res, next) => {
   if (!req.file) {
-    console.log("no file");
     return res.status(400).json({
       message: "Please, upload file!",
     });

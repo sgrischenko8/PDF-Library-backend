@@ -15,7 +15,11 @@ router.use("/:id", fileMiddleware.checkFileId);
 router
   .route("/:id")
   .get(fileController.getFile)
-  .patch(fileMiddleware.checkFile, fileController.updateFile)
+  .patch(
+    fileMiddleware.checkFile,
+    fileMiddleware.checkBody,
+    fileController.updateFile
+  )
   .delete(fileController.removeFile);
 
 module.exports = router;

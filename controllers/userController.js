@@ -7,7 +7,7 @@ const { unlink } = require("node:fs");
 exports.register = async (req, res, next) => {
   req.body.verificationToken = req.session.id;
 
-  const { email, password } = req.body;
+  const { email } = req.body;
   try {
     const user = await User.findOne({ email });
 
@@ -34,12 +34,14 @@ exports.login = async (req, res, next) => {
 
     req.session.save((err) => {
       if (err) {
-        return next(err);
+        console.log(err);
+        next(err);
       }
     });
 
     res.status(200).json(req.user);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -57,15 +59,21 @@ exports.logout = async (req, res, next) => {
         .json("All sessions for the user have been logged out successfully");
     });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
 
 exports.getCurrentUser = async (req, res, next) => {
-  const user = await User.findById(req.session.userId).select(
-    "-password -verify -verificationToken"
-  );
-  res.status(200).json(user);
+  try {
+    const user = await User.findById(req.session.userId).select(
+      "-password -verify -verificationToken"
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 exports.getUserData = async (req, res, next) => {
@@ -73,6 +81,7 @@ exports.getUserData = async (req, res, next) => {
     const files = await File.find({ uploadedBy: req.user._id });
     res.status(200).json({ user: req.user, files });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -81,7 +90,6 @@ exports.updateUser = async (req, res, next) => {
   const { password } = req.body;
   const oldPhoto = req.user?.photo;
   const photo = req.file?.path;
-
   try {
     if (oldPhoto && typeof oldPhoto === "string") {
       const currentPhotoPath = path.resolve(oldPhoto);
@@ -89,6 +97,8 @@ exports.updateUser = async (req, res, next) => {
       unlink(currentPhotoPath, (err) => {
         if (err) console.log(err);
       });
+    }
+    if (photo) {
       req.body = {
         photo,
       };
@@ -102,9 +112,12 @@ exports.updateUser = async (req, res, next) => {
     await User.findByIdAndUpdate({ _id: req.user._id }, req.body).select(
       "-password -verify -verificationToken"
     );
+
     const updatedUser = Object.assign(req.user, req.body);
+
     res.status(201).json(updatedUser);
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
@@ -113,6 +126,7 @@ exports.getPing = async (req, res, next) => {
   try {
     res.status(200).json();
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
