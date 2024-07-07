@@ -37,8 +37,8 @@ app.use(
     }),
     cookie: {
       secure: false,
-      httpOnly: process.env.NODE_ENV === "development" ? true : false,
-      sameSite: "lax",
+      httpOnly: true,
+      sameSite: "Strict",
       maxAge: 14 * 24 * 60 * 60 * 1000,
     },
   })
@@ -70,24 +70,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.patch(
-  "/users/:id/photo",
-  upload.single("photo"),
-  async (req, res, next) => {
-    try {
-      if (!req.file.mimetype.startsWith("image")) {
-        return res.status(400).json({
-          message: "Incorrect type of image. Please, upload .jpg or png",
-        });
-      }
+app.patch("/users/:id/photo", upload.single("photo"), (req, res, next) => {
+  console.log(req.file, "file");
 
-      next();
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      res.status(500).send(error.message);
-    }
+  if (!req.file.mimetype.startsWith("image")) {
+    return res.status(400).json({
+      message: "Incorrect type of image. Please, upload .jpg or png",
+    });
   }
-);
+
+  next();
+});
 app.use("/users", userRouter);
 
 // middleware for uploadinf PDF
