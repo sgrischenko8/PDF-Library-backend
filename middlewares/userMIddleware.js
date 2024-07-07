@@ -94,12 +94,22 @@ exports.IsEmailAndPasswordFit = async (req, res, next) => {
 };
 
 exports.checkCookie = async (req, res, next) => {
+  req.copy = req.session.id;
+  console.log(
+    req.copy === req.session.id,
+    "<=boolean",
+    req.copy,
+    "<=copy",
+    req.session.id,
+    "<=orogonal"
+  );
   if (!req.session.id) {
     res.status(401).send("You need to log in to access this resource");
   }
 
   try {
     const sessionCollection = mongoose.connection.db.collection("sessions");
+    console.log(req.session.id, "session id");
     const sessionExists = await sessionCollection.findOne({
       _id: req.session.id,
     });

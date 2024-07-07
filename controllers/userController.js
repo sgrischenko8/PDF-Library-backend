@@ -31,14 +31,14 @@ exports.login = async (req, res, next) => {
     }
 
     req.session.userId = req.user._id;
-
+    // res.cookie("uId", req.user._id);
     req.session.save((err) => {
       if (err) {
         console.log(err);
         next(err);
       }
     });
-
+    console.log(req.user);
     res.status(200).json(req.user);
   } catch (error) {
     console.log(error);
@@ -65,10 +65,17 @@ exports.logout = async (req, res, next) => {
 };
 
 exports.getCurrentUser = async (req, res, next) => {
+  console.log(
+    req.session.userId,
+    "=== req.session.userId ====getCurrentUser====="
+  );
   try {
     const user = await User.findById(req.session.userId).select(
       "-password -verify -verificationToken"
     );
+    if (req.copy !== req.session.id) {
+      console.log("=== its not the same! ====getCurrentUser=====");
+    }
     res.status(200).json(user);
   } catch (error) {
     console.log(error);
@@ -79,6 +86,9 @@ exports.getCurrentUser = async (req, res, next) => {
 exports.getUserData = async (req, res, next) => {
   try {
     const files = await File.find({ uploadedBy: req.user._id });
+    if (req.copy !== req.session.id) {
+      console.log("=== its not the same! ====getUserData=====");
+    }
     res.status(200).json({ user: req.user, files });
   } catch (error) {
     console.log(error);
@@ -114,7 +124,9 @@ exports.updateUser = async (req, res, next) => {
     );
 
     const updatedUser = Object.assign(req.user, req.body);
-
+    if (req.copy !== req.session.id) {
+      console.log("=== its not the same! ====updateUser=====");
+    }
     res.status(201).json(updatedUser);
   } catch (error) {
     console.log(error);
@@ -123,10 +135,5 @@ exports.updateUser = async (req, res, next) => {
 };
 
 exports.getPing = async (req, res, next) => {
-  try {
-    res.status(200).json();
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
+  res.status(200).json();
 };
