@@ -109,7 +109,6 @@ exports.checkCookie = async (req, res, next) => {
 
   try {
     const sessionCollection = mongoose.connection.db.collection("sessions");
-    console.log(sessionCollection, "session col");
     console.log(req.session, "req session");
     const sessionExists = await sessionCollection.findOne({
       _id: req.session.id,
